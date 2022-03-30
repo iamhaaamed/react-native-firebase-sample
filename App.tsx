@@ -8,107 +8,146 @@
  * @format
  */
 
-import React from 'react';
+import database from '@react-native-firebase/database';
+import React, {useEffect, useState} from 'react';
 import {
+  FlatList,
   SafeAreaView,
-  ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
-  useColorScheme,
+  TouchableOpacity,
   View,
 } from 'react-native';
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 
-const Section: React.FC<{
-  title: string;
-}> = ({children, title}) => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
+import MenuItem from '~/components/MenuItem';
+import {Colors, Spacing} from '~/styles';
 
 const App = () => {
-  const isDarkMode = useColorScheme() === 'dark';
+  const [menus, setMenus] = useState([]);
+  const [selectedItems, setSelectedItems] = useState([]);
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+  useEffect(() => {
+    database()
+      .ref('/menus')
+      .once('value')
+      .then(snapshot => {
+        const newMenus: any = [];
+        snapshot.forEach(childSnapshot => {
+          newMenus.push({...childSnapshot.val(), id: childSnapshot.key});
+        });
+        setMenus(newMenus);
+
+        return true;
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }, []);
+
+  const sum = selectedItems?.map(o => o.price).reduce((a, c) => +a + +c, 0);
+
+  const renderItem = ({item}) => (
+    <TouchableOpacity
+      onPress={() => {
+        if (selectedItems?.map((a: any) => a.id).includes(item.id)) {
+          setSelectedItems(prev => prev.filter((a: any) => a.id !== item.id));
+        } else {
+          setSelectedItems(prev => [...prev, item]);
+        }
+      }}
+      style={{
+        ...styles.menuItem,
+        backgroundColor: selectedItems.map((a: any) => a.id).includes(item.id)
+          ? Colors.lightgray
+          : Colors.white,
+      }}>
+      <MenuItem label="Category" value={item.category} />
+      <MenuItem label="Name" value={item.name} />
+      <MenuItem label="Amount" value={item.amount} />
+      <MenuItem label="Price" value={item.amount} />
+    </TouchableOpacity>
+  );
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+    <SafeAreaView>
+      <View style={{padding: Spacing.small}}>
+        {selectedItems?.length > 0 && (
+          <TouchableOpacity
+            style={styles.saveButton}
+            onPress={() => {
+              const newReference = database().ref('/transactions').push();
+
+              newReference
+                .set({
+                  items: selectedItems.map(a => a.id),
+                  createdAt: new Date().toUTCString(),
+                })
+                .then(() => setSelectedItems([]))
+                .catch((error: any) => {
+                  console.log(error);
+                });
+            }}>
+            <Text
+              style={{
+                ...styles.buttonText,
+                fontSize: Spacing.large,
+              }}>
+              Save Transaction
+            </Text>
+            <View style={{flexDirection: 'row'}}>
+              <Text style={styles.buttonText}>Sum: </Text>
+              <Text style={styles.buttonText}>{sum}$</Text>
+            </View>
+          </TouchableOpacity>
+        )}
+
+        <FlatList
+          data={menus}
+          numColumns={2}
+          renderItem={renderItem}
+          keyExtractor={item => item.id}
+        />
+      </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  menuItem: {
+    flex: 1,
+    padding: Spacing.small,
+    borderRadius: 5,
+    margin: Spacing.smallest,
+
+    shadowColor: Colors.black,
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.22,
+    shadowRadius: 2.22,
+
+    elevation: 3,
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  saveButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: Spacing.base,
+    padding: Spacing.smaller,
+    borderRadius: Spacing.smallest,
+    backgroundColor: Colors.orange,
+
+    shadowColor: Colors.black,
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.22,
+    shadowRadius: 2.22,
+
+    elevation: 3,
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
+  buttonText: {fontWeight: 'bold', color: Colors.white},
 });
 
 export default App;
