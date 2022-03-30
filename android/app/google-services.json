@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "675574917579",
+    "firebase_url": "https://utak-ddc50-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "utak-ddc50",
+    "storage_bucket": "utak-ddc50.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:675574917579:android:4ec1b9c2b19830c3bc2e4e",
+        "android_client_info": {
+          "package_name": "com.reactnativefirebasesample"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "675574917579-ssbabv7vl6itf63qh01cjmq1jg9j77la.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJWXVUHAMRuwlvnx1GqWSo6m_OtwRTScg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "675574917579-ssbabv7vl6itf63qh01cjmq1jg9j77la.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "675574917579-0233ppp5c31533jr2eooeebrhkuvso37.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.reactnativefirebasesample"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
