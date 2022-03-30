@@ -18,15 +18,19 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 import MenuItem from '~/components/MenuItem';
 import {Colors, Spacing} from '~/styles';
+import {scale} from '~/utils/scaling';
 
 const App = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const [menus, setMenus] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
 
   useEffect(() => {
+    setIsLoading(true);
     database()
       .ref('/menus')
       .once('value')
@@ -41,7 +45,9 @@ const App = () => {
       })
       .catch(error => {
         console.log(error);
-      });
+        return true;
+      })
+      .finally(() => setIsLoading(false));
   }, []);
 
   const sum = selectedItems?.map(o => o.price).reduce((a, c) => +a + +c, 0);
@@ -70,11 +76,13 @@ const App = () => {
 
   return (
     <SafeAreaView>
+      <Spinner visible={isLoading} />
       <View style={{padding: Spacing.small}}>
         {selectedItems?.length > 0 && (
           <TouchableOpacity
             style={styles.saveButton}
             onPress={() => {
+              setIsLoading(true);
               const newReference = database().ref('/transactions').push();
 
               newReference
@@ -85,7 +93,8 @@ const App = () => {
                 .then(() => setSelectedItems([]))
                 .catch((error: any) => {
                   console.log(error);
-                });
+                })
+                .finally(() => setIsLoading(false));
             }}>
             <Text
               style={{
@@ -102,6 +111,9 @@ const App = () => {
         )}
 
         <FlatList
+          style={{
+            marginTop: selectedItems?.length > 0 ? 0 : scale(100),
+          }}
           data={menus}
           numColumns={2}
           renderItem={renderItem}
