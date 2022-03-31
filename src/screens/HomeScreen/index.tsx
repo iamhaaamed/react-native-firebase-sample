@@ -22,12 +22,13 @@ import Spinner from 'react-native-loading-spinner-overlay';
 
 import MenuItem from '~/components/MenuItem';
 import {Colors, Spacing} from '~/styles';
+import type {Menu} from '~/types/Menu';
 import {scale} from '~/utils/scaling';
 
 const HomeScreen = ({navigation}: {navigation: any}) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [menus, setMenus] = useState([]);
-  const [selectedItems, setSelectedItems] = useState([]);
+  const [menus, setMenus] = useState<Menu[]>([]);
+  const [selectedItems, setSelectedItems] = useState<Menu[]>([]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -52,7 +53,7 @@ const HomeScreen = ({navigation}: {navigation: any}) => {
 
   const sum = selectedItems?.map(o => o.price).reduce((a, c) => +a + +c, 0);
 
-  const renderItem = ({item}) => (
+  const renderItem = ({item}: {item: Menu}) => (
     <TouchableOpacity
       onPress={() => {
         if (selectedItems?.map((a: any) => a.id).includes(item.id)) {
@@ -75,10 +76,16 @@ const HomeScreen = ({navigation}: {navigation: any}) => {
   );
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{flex: 1}}>
       <Spinner visible={isLoading} />
-
-      <View style={{padding: Spacing.small}}>
+      <TouchableOpacity
+        style={{justifyContent: 'center', alignItems: 'center'}}
+        onPress={() => navigation.navigate('Chart')}>
+        <Text style={{color: Colors.blue, marginVertical: Spacing.base}}>
+          Daily Chart
+        </Text>
+      </TouchableOpacity>
+      <View style={{flex: 1, padding: Spacing.small}}>
         {selectedItems?.length > 0 && (
           <TouchableOpacity
             style={styles.saveButton}
